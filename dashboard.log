@@ -1,0 +1,35 @@
+
+11:20:12: Applicazione avviata.
+2026-04-22 11:20:12 - INFO - Dash is running on http://127.0.0.1:8050/
+
+11:20:17: Applicazione avviata.
+11:20:18: Mappa aggiornata (10 nodi, 9 link unici).
+11:22:44: Selezione annullata.
+11:22:44: Aggiornamento dati eseguito.
+11:22:45: Profilo stato server | border_router: G=2 Y=1 R=0 | router: G=2 Y=0 R=0 | child: G=2 Y=3 R=0
+11:22:45: Mappa aggiornata (10 nodi, 9 link unici).
+11:26:21: Applicazione avviata.
+11:26:33: Aggiornamento dati eseguito.
+11:26:33: Selezione annullata.
+11:26:33: Profilo stato server | border_router: G=3 Y=0 R=0 | router: G=2 Y=0 R=0 | child: G=5 Y=0 R=0
+11:26:34: Mappa aggiornata (10 nodi, 9 link unici).
+13:27:05: Applicazione avviata.
+13:27:33: Aggiornamento dati eseguito.
+13:27:33: Selezione annullata.
+13:27:33: Profilo stato server | border_router: G=1 Y=1 R=1 | router: G=2 Y=0 R=0 | child: G=3 Y=0 R=2
+13:27:34: Mappa aggiornata (10 nodi, 9 link unici).
+13:28:30: Applicazione avviata.
+13:28:33: Aggiornamento dati eseguito.
+13:28:33: Profilo stato server | border_router: G=2 Y=1 R=0 | router: G=1 Y=1 R=0 | child: G=3 Y=2 R=0
+13:28:34: Selezione annullata.
+13:28:35: Mappa aggiornata (10 nodi, 9 link unici).
+13:34:08: Applicazione avviata.
+13:34:33: Aggiornamento dati eseguito.
+13:34:33: Selezione annullata.
+13:34:33: Profilo stato server | border_router: G=3 Y=0 R=0 | router: G=2 Y=0 R=0 | child: G=3 Y=2 R=0
+13:34:34: Mappa aggiornata (10 nodi, 9 link unici).
+13:37:22: Applicazione avviata.
+13:37:33: Aggiornamento dati eseguito.
+13:37:33: Selezione annullata.
+13:37:33: Profilo stato server | border_router: G=2 Y=1 R=0 | router: G=0 Y=2 R=0 | child: G=3 Y=2 R=0
+13:37:34: Mappa aggiornata (10 nodi, 9 link unici).

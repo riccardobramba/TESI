@@ -1,0 +1,35 @@
+body {
+    overflow-y: hidden;
+    background-color: #ffffff;
+    color: #000000;
+    overflow-x: hidden;
+}
+
+.main-content-row {
+    height: calc(100vh - 120px);
+    overflow-x: hidden;
+    overflow-y: hidden;
+}
+
+.scrollable-column {
+    height: 100%;
+    overflow-y: hidden;
+    padding-right: 0;
+}
+
+.nav-tabs .nav-link.active {
+    background-color: #e9ecef; 
+    color: black;
+    border-color: #dee2e6 #dee2e6 #fff;
+}
+
+
+.nav-tabs .nav-link:not(.active):hover {
+    background-color: #e9ecef; 
+}
+
+.control-section {
+    background-color: #f8f9fa; 
+    border: 1px solid #dee2e6; 
+    padding: 0.5rem;
+}
