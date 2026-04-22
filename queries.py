@@ -341,7 +341,7 @@ def ensure_recent_sensor_data(conn, max_age_seconds: int = 1800) -> None:
     # Profilo stato server per ruolo (random ad ogni riavvio):
     # - Border Router: quasi sempre verde.
     # - Router: dipende dal Border Router connesso.
-    # - Child: random.
+    # - Child: fatto random.
     nodes_records = get_all_nodes(conn)
     raw_links = get_all_links(conn)
     topo_links = compute_topology_map_links(nodes_records, raw_links)
