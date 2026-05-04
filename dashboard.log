@@ -33,3 +33,50 @@
 13:37:33: Selezione annullata.
 13:37:33: Profilo stato server | border_router: G=2 Y=1 R=0 | router: G=0 Y=2 R=0 | child: G=3 Y=2 R=0
 13:37:34: Mappa aggiornata (10 nodi, 9 link unici).
+11:12:39: Applicazione avviata.
+2026-05-04 11:12:39 - INFO - Dash is running on http://127.0.0.1:8050/
+
+11:12:47: Applicazione avviata.
+11:14:24: Aggiornamento dati eseguito.
+11:14:24: Selezione annullata.
+11:14:25: Profilo stato server | border_router: G=2 Y=1 R=0 | router: G=2 Y=0 R=0 | child: G=4 Y=1 R=0
+11:14:26: Mappa aggiornata (10 nodi, 9 link unici).
+11:15:00: Mappa aggiornata (10 nodi, 9 link unici).
+11:15:01: Selezionato nodo singolo (lasso): node-1
+11:16:44: Aggiornamento dati eseguito.
+11:16:44: Selezione annullata.
+11:16:45: Profilo stato server | border_router: G=0 Y=3 R=0 | router: G=0 Y=2 R=0 | child: G=2 Y=3 R=0
+11:16:45: Mappa aggiornata (10 nodi, 9 link unici).
+11:18:50: Applicazione avviata.
+11:18:53: Aggiornamento dati eseguito.
+11:18:53: Selezione annullata.
+11:18:53: Profilo stato server | border_router: G=2 Y=1 R=0 | router: G=2 Y=0 R=0 | child: G=3 Y=2 R=0
+11:18:53: Mappa aggiornata (10 nodi, 9 link unici).
+12:08:39: Aggiornamento dati eseguito.
+12:08:39: Selezione annullata.
+12:08:41: Profilo stato server | border_router: G=3 Y=0 R=0 | router: G=2 Y=0 R=0 | child: G=3 Y=2 R=0
+12:08:41: Mappa aggiornata (10 nodi, 9 link unici).
+12:13:08: Applicazione avviata.
+12:13:09: Aggiornamento dati eseguito.
+12:13:09: Selezione annullata.
+12:13:09: Profilo stato server | border_router: G=3 Y=0 R=0 | router: G=2 Y=0 R=0 | child: G=4 Y=1 R=0
+12:13:10: Mappa aggiornata (10 nodi, 9 link unici).
+12:13:56: Applicazione avviata.
+2026-05-04 12:13:56 - INFO - Dash is running on http://127.0.0.1:8050/
+
+12:14:00: Applicazione avviata.
+12:14:01: Aggiornamento dati eseguito.
+12:14:01: Selezione annullata.
+12:14:01: Profilo stato server | border_router: G=3 Y=0 R=0 | router: G=2 Y=0 R=0 | child: G=4 Y=1 R=0
+12:14:03: Mappa aggiornata (10 nodi, 9 link unici).
+12:18:04: Applicazione avviata.
+12:18:06: Aggiornamento dati eseguito.
+12:18:06: Selezione annullata.
+12:18:06: Profilo stato server | border_router: G=3 Y=0 R=0 | router: G=2 Y=0 R=0 | child: G=3 Y=2 R=0
+12:18:07: Mappa aggiornata (10 nodi, 9 link unici).
+12:18:53: Mappa aggiornata (10 nodi, 9 link unici).
+12:18:53: Selezionato nodo singolo (lasso): node-5
+12:19:12: Selezionato nodo singolo (lasso): node-6
+12:19:12: Mappa aggiornata (10 nodi, 9 link unici).
+12:19:19: Selezionato un gruppo di 2 nodi.
+12:19:19: Mappa aggiornata (10 nodi, 9 link unici).

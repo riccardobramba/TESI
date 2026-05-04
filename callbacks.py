@@ -60,25 +60,54 @@ def format_rssi_for_display(value):
 
 def aggregate_group_trend(records):
     """
-    Converte trend multi-nodo in una singola curva media di gruppo per timestamp.
+    Converte trend multi-nodo in una singola curva media di gruppo.
+    Nota importante:
+    - i nodi spesso non campionano nello stesso identico secondo;
+    - per evitare medie "finte", allineiamo i timestamp a finestre da 1 minuto,
+      facciamo prima la media per singolo nodo e poi la media tra nodi.
     """
     if not records:
         return []
     df = pd.DataFrame(records)
     if df.empty or 'timestamp' not in df.columns:
         return []
-    if 'value' in df.columns:
-        value_col = 'value'
-    else:
-        numeric_cols = [c for c in df.columns if pd.api.types.is_numeric_dtype(df[c])]
-        value_col = numeric_cols[0] if numeric_cols else None
-    if not value_col:
+
+    if 'value' not in df.columns:
         return []
+
+    df = df.copy()
+    df['timestamp'] = normalize_timestamp_series(df['timestamp'])
+    df['value'] = pd.to_numeric(df['value'], errors='coerce')
+    df = df[df['timestamp'].notna() & df['value'].notna()].copy()
+    if df.empty:
+        return []
+
+    # Colonna identificativa nodo: preferisco node_id, fallback su name.
+    node_key = 'node_id' if 'node_id' in df.columns else ('name' if 'name' in df.columns else None)
+    if node_key is None:
+        out = (
+            df.sort_values('timestamp')
+              .groupby('timestamp', as_index=False)['value']
+              .mean()
+        )
+        return out.to_dict('records')
+
+    # 1) Allineamento temporale minimo per evitare mancata aggregazione tra nodi
+    # con campioni a secondi leggermente diversi.
+    df['bucket_ts'] = df['timestamp'].dt.floor('min')
+
+    # 2) Media per nodo nella finestra temporale.
+    per_node = (
+        df.groupby([node_key, 'bucket_ts'], as_index=False)['value']
+          .mean()
+    )
+
+    # 3) Media reale di gruppo: media tra nodi (tutti con stesso peso) per bucket.
     out = (
-        df.groupby('timestamp', as_index=False)[value_col]
-        .mean()
-        .rename(columns={value_col: 'value'})
-        .sort_values('timestamp')
+        per_node.groupby('bucket_ts', as_index=False)['value']
+                .mean()
+                .rename(columns={'bucket_ts': 'timestamp'})
+                .sort_values('timestamp')
     )
     return out.to_dict('records')
 
@@ -1616,7 +1645,6 @@ def update_trend_graph_view(selectedData, active_graph, quick_time_range, settin
     
     conn.close()
     
-    rule = settings_data.get('downsample_rule', 'h') if settings_data else 'h'
     full_df = pd.DataFrame(data_to_show).copy()
     title_date_str = ""
     if not full_df.empty:
@@ -1626,20 +1654,21 @@ def update_trend_graph_view(selectedData, active_graph, quick_time_range, settin
         title_date_str = quick_label_map.get(quick_time_range or '24h', 'Ultime 24h')
         # Se la finestra rapida è vuota ma la rete risulta sana, evita il "grafico vuoto"
         # con un carry-forward conservativo dell'ultimo campione valido.
-        if df_for_small_graph.empty and quick_time_range in {'1h', '6h', '24h'}:
+        # Nota: applico questo ai soli scenari "media generale".
+        # Per selezioni nodo/gruppo manteniamo coerenza stretta col modale (niente dati inventati).
+        if df_for_small_graph.empty and quick_time_range in {'1h', '6h', '24h'} and not selected_ids:
             hours_map = {'1h': 1, '6h': 6, '24h': 24}
             if _selection_health_is_good(selected_ids):
                 df_for_small_graph = _build_recent_carry_forward(
                     full_df, hours_window=hours_map.get(quick_time_range, 24)
                 )
                 title_date_str = f"{quick_label_map.get(quick_time_range, 'Ultime 24h')} (stimato: rete sana)"
-        if len(df_for_small_graph) < 2:
-            df_for_small_graph = full_df.sort_values('timestamp').tail(50)
-            title_date_str = "Ultimi campioni"
     else:
         df_for_small_graph = pd.DataFrame()
     
-    processed_df = process_trend_data(df_for_small_graph, rule)
+    # Nota: il grafico piccolo deve mostrare tutti i dati disponibili
+    # (come il modale), senza downsampling.
+    processed_df = df_for_small_graph.copy()
     processed_df = ensure_min_points_for_plot(processed_df, min_points=2, minutes_back=5)
     traces, _ = create_traces_from_df(processed_df, active_graph)
     fig = go.Figure(data=traces)
@@ -1895,7 +1924,7 @@ def update_modal_graph(is_open, time_range, selected_date,
         # Nota mia: niente "trucchi" con dati fuori fascia, se no è fuorviante.
         return go.Figure(), "Nessun dato nella fascia oraria selezionata"
     
-    # 3. Mantiene dettaglio originale nel modale; downsampling gestito dal grafico principale.
+    # 3. Il modale mantiene il dettaglio completo.
     df = ensure_min_points_for_plot(df, min_points=2, minutes_back=5)
     
     # 4. Creazione tracce Plotly
