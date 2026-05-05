@@ -185,31 +185,92 @@ def generate_synthetic_events(node_name, node_id, health_band, fixed_count=None)
 
 
 def process_trend_data(df, rule):
-    if rule == 'raw' or df.empty:
+    """
+    Downsampling "safe":
+    - mantiene forma generale della curva;
+    - evita riduzioni eccessive del numero di punti;
+    - applica la stessa logica a grafico piccolo e modale.
+    """
+    if not isinstance(df, pd.DataFrame) or df.empty:
         return df
 
-    # pandas: evita warning su alias deprecati (es. 'H' -> 'h')
-    if isinstance(rule, str) and rule.upper() == 'H':
-        rule = 'h'
+    out = df.copy()
+    if 'timestamp' not in out.columns:
+        return out
+    out['timestamp'] = pd.to_datetime(out['timestamp'], errors='coerce')
+    out = out[out['timestamp'].notna()].copy()
+    if out.empty or 'value' not in out.columns:
+        return out
+    out['value'] = pd.to_numeric(out['value'], errors='coerce')
+    out = out[out['value'].notna()].copy()
+    if out.empty:
+        return out
 
-    df = df.copy()
-    df = df.assign(timestamp=pd.to_datetime(df['timestamp']))
-    df = df.set_index('timestamp')
-    numeric_cols = df.select_dtypes(include='number').columns
-    
-    if 'name' in df.columns:
-        df_resampled = df.groupby('name').resample(rule)[numeric_cols].mean()
-        df_resampled = df_resampled.dropna().reset_index()
-    else:
-        df_resampled = df.resample(rule)[numeric_cols].mean()
-        df_resampled = df_resampled.dropna().reset_index()
+    norm = str(rule or 'raw').strip().lower()
+    alias = {'h': '1h', '1h': '1h', '1hour': '1h'}
+    norm = alias.get(norm, norm)
+    if norm == 'raw':
+        return out.sort_values('timestamp')
 
-    for col in df_resampled.columns:
-        if any(key in col.lower() for key in ['temp', 'humid', 'batt', 'value']):
-            df_resampled = df_resampled.rename(columns={col: 'value'})
-            break
-            
-    return df_resampled
+    freq_map = {
+        '15min': '15min',
+        '30min': '30min',
+        '1h': '1h',
+        '2h': '2h',
+        '4h': '4h',
+    }
+    # fallback progressivo per evitare perdita eccessiva di dettaglio
+    soften_map = {'4h': '2h', '2h': '1h', '1h': '30min', '30min': '15min', '15min': 'raw'}
+
+    def _resample_with(freq_key: str):
+        if freq_key == 'raw':
+            return out.sort_values('timestamp')
+        freq = freq_map.get(freq_key)
+        if not freq:
+            return out.sort_values('timestamp')
+
+        group_cols = []
+        if 'node_id' in out.columns:
+            group_cols = ['node_id']
+        elif 'name' in out.columns:
+            group_cols = ['name']
+
+        if group_cols:
+            pieces = []
+            for _, part in out.groupby(group_cols):
+                p = (
+                    part.set_index('timestamp')
+                        .resample(freq)['value']
+                        .mean()
+                        .dropna()
+                        .reset_index()
+                )
+                for c in group_cols:
+                    p[c] = part.iloc[0][c]
+                pieces.append(p)
+            if not pieces:
+                return out.sort_values('timestamp')
+            return pd.concat(pieces, ignore_index=True).sort_values('timestamp')
+
+        return (
+            out.set_index('timestamp')
+               .resample(freq)['value']
+               .mean()
+               .dropna()
+               .reset_index()
+               .sort_values('timestamp')
+        )
+
+    original_points = len(out)
+    applied = norm
+    resampled = _resample_with(applied)
+
+    # Se troppo aggressivo (<20% punti), rende il downsampling più fine.
+    while original_points > 0 and len(resampled) / original_points < 0.20 and applied in soften_map:
+        applied = soften_map[applied]
+        resampled = _resample_with(applied)
+
+    return resampled
 
 
 def apply_quick_time_filter(df, quick_range):
@@ -1666,9 +1727,8 @@ def update_trend_graph_view(selectedData, active_graph, quick_time_range, settin
     else:
         df_for_small_graph = pd.DataFrame()
     
-    # Nota: il grafico piccolo deve mostrare tutti i dati disponibili
-    # (come il modale), senza downsampling.
-    processed_df = df_for_small_graph.copy()
+    rule = (settings_data or {}).get('downsample_rule', 'raw')
+    processed_df = process_trend_data(df_for_small_graph, rule)
     processed_df = ensure_min_points_for_plot(processed_df, min_points=2, minutes_back=5)
     traces, _ = create_traces_from_df(processed_df, active_graph)
     fig = go.Figure(data=traces)
@@ -1877,10 +1937,11 @@ def toggle_modal(n_clicks_card, is_open):
     Input('date-picker-single', 'date'),        # Data selezionata
     State('trend-graph-title', 'children'),     # Recupera il titolo dal grafico piccolo
     State('active-graph-store', 'data'),        # 'temperature', 'humidity', o 'battery'
-    State('selected-node-store', 'data')        # ID dei nodi selezionati
+    State('selected-node-store', 'data'),       # ID dei nodi selezionati
+    State('settings-store', 'data')             # Downsampling condiviso
 )
 def update_modal_graph(is_open, time_range, selected_date, 
-                       small_graph_title, active_graph, selected_node_data):
+                       small_graph_title, active_graph, selected_node_data, settings_data):
     
     if not is_open:
         return go.Figure(), ""
@@ -1924,7 +1985,9 @@ def update_modal_graph(is_open, time_range, selected_date,
         # Nota mia: niente "trucchi" con dati fuori fascia, se no è fuorviante.
         return go.Figure(), "Nessun dato nella fascia oraria selezionata"
     
-    # 3. Il modale mantiene il dettaglio completo.
+    # 3. Applica la stessa regola di downsampling del grafico piccolo.
+    rule = (settings_data or {}).get('downsample_rule', 'raw')
+    df = process_trend_data(df, rule)
     df = ensure_min_points_for_plot(df, min_points=2, minutes_back=5)
     
     # 4. Creazione tracce Plotly

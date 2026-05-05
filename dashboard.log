@@ -80,3 +80,17 @@
 12:19:12: Mappa aggiornata (10 nodi, 9 link unici).
 12:19:19: Selezionato un gruppo di 2 nodi.
 12:19:19: Mappa aggiornata (10 nodi, 9 link unici).
+15:52:58: Applicazione avviata.
+2026-05-05 15:52:58 - INFO - Dash is running on http://127.0.0.1:8050/
+
+15:53:07: Applicazione avviata.
+16:02:57: Applicazione avviata.
+16:06:49: Applicazione avviata.
+16:08:15: Selezione annullata.
+16:08:15: Aggiornamento dati eseguito.
+16:08:15: Profilo stato server | border_router: G=2 Y=1 R=0 | router: G=1 Y=1 R=0 | child: G=2 Y=3 R=0
+16:08:16: Mappa aggiornata (10 nodi, 9 link unici).
+16:08:27: Downsampling aggiornato a 'ogni 30 minuti'.
+16:08:34: Mappa aggiornata (10 nodi, 9 link unici).
+16:08:34: Selezionato nodo singolo (lasso): node-7
+16:09:10: Downsampling aggiornato a 'dati grezzi (nessun raggruppamento)'.
